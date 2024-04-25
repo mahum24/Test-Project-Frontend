@@ -10,8 +10,7 @@ export default function NewFileUpload() {
    
 
     const submit = async event => {
-        event.preventDefault()
-
+       
         const formData = new FormData();
         formData.append("image", file)
         console.log(formData)
@@ -20,15 +19,28 @@ export default function NewFileUpload() {
                 async function getFile() {
                     console.log("szdxfcgvhbn", result.data)
                     const id = result.data._id
-                    const image = await axios.get(`http://localhost:3001/api/post/${id}`)
-                    setFilesUploaded(image.data)
+                    const response = await axios.get(`http://localhost:3001/api/post/${id}`);
+                    console.log(response.data)
+                    const imageBase64 = arrayBufferToBase64(response.data.imageData.data);
+                    const src = `data:image/jpeg;base64,${imageBase64}`;
+                    
+                    setFilesUploaded(src);
             
                 }
-                getFile(); setFile(null) })
+                getFile();
+            })
             .catch((err)=> console.log(err))
             
     }
-
+    const arrayBufferToBase64 = (buffer) => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    };
     const fileSelected = event => {
         const file = event.target.files[0]
         setFile(file)
@@ -40,7 +52,7 @@ export default function NewFileUpload() {
                 <input onChange={fileSelected} type="file" accept="image/*"></input>
                 <button type="submit">Submit</button>
             </form>
-            {filesUploaded && <img className="rounded" width="430" height="768" src={filesUploaded?.imageUrl}></img>}
+            {filesUploaded && <img className="rounded" width="430" height="768" src={filesUploaded}></img>}
 
 
         </div>
